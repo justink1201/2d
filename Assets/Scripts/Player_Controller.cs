@@ -6,6 +6,9 @@ using UnityEngine;
 
 public class Player_Controller : MonoBehaviour
 {
+    [Header("Wall Jumping")]
+    [SerializeField] private float wallJumpX; //Horizontal
+    [SerializeField] private float wallJumpY; //Vertical
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private LayerMask wallLayer;
     [SerializeField] private float _jumpForce;
@@ -84,65 +87,34 @@ public class Player_Controller : MonoBehaviour
         //JUMP.
         if (Input.GetKeyDown(KeyCode.Space) && _canJump && !isPlayerDead && isGrounded())
         {
-            PerformJump(_jumpForce, 1);
+            PerformJump(_jumpForce, 2);
             _myAudio.PlayOneShot(_audioJump);
         }
-
-        if (Input.GetKeyUp(KeyCode.Space))
+        //Adjustable jump height
+        if(Input.GetKeyUp(KeyCode.Space) && _myBody.velocity.y > 0)
+            _myBody.velocity = new Vector2(_myBody.velocity.x, _myBody.velocity.y / 2);
+        
+        if (onWall())
         {
-            StopJump();
-        }
-
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded())
-        {
-            _myBody.velocity = new Vector2(_myBody.velocity.x, _jumpForce);
-        }
-        else if (onWall() && !isGrounded())
-        {
-            if (horizontalInput == 0)
-            {
-                _myBody.velocity = new Vector2(-Mathf.Sign(transform.localScale.x) * 10, 0);
-                transform.localScale = new Vector3(-Mathf.Sign(transform.localScale.x), transform.localScale.y, transform.localScale.z);
-            }
-            else
-            {
-
-            }
-            _myBody.velocity = new Vector2(-Mathf.Sign(transform.localScale.x) * 3, 6);
-
-            wallJumpCooldown = 1;
-        }
-
-        //Wall Jump Logic
-        if (wallJumpCooldown < 0.2f)
-        {
-            _myBody.velocity = new Vector2(horizontalInput * _groundMoveSpeed, _myBody.velocity.y);
-
-            if (onWall() && !isGrounded())
-            {
-                _myBody.velocity = new Vector2(0, _myBody.velocity.y);
-                _myBody.gravityScale = 0;
-                if (Input.GetKeyDown(KeyCode.Space))
-                {
-                    PerformJump(_jumpForce, 1);
-                    _myAudio.PlayOneShot(_audioJump);
-                }
-            }
-            else
-                _myBody.gravityScale = 3;
+            _myBody.gravityScale = 0;
+            _myBody.velocity = Vector2.zero;
         }
         else
         {
-            wallJumpCooldown += Time.deltaTime;
-            _myBody.velocity = new Vector2(Mathf.Sign(transform.localScale.x) * 3, 6);
-            wallJumpCooldown = 0f;
+            _myBody.gravityScale = 2;
+            _myBody.velocity = new Vector2(horizontalInput * _groundMoveSpeed, _myBody.velocity.y);
         }
-
         TimeVariableJump();
         CheckGround();
         UpdateCoyoteTime();
         EnemyCheck();
         //print(onWall());
+    }
+
+    private void WallJump()
+    {
+        _myBody.AddForce(new Vector2(-Mathf.Sign(transform.localScale.x) * wallJumpX, wallJumpY));
+        wallJumpCooldown = 0;
     }
 
     void PerformJump(float _jumpStrength, float _hangMultiplier)
