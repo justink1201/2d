@@ -10,10 +10,17 @@ public class Enemy_Sideways : MonoBehaviour
     private float leftEdge;
     private float rightEdge;
 
+
+    private bool isAllowDamage;
+
     private void Awake()
     {
         leftEdge = transform.position.x - movementDistance;
         rightEdge = transform.position.x + movementDistance;
+
+
+        isAllowDamage = true;
+
     }
 
     private void Update()
@@ -41,7 +48,16 @@ public class Enemy_Sideways : MonoBehaviour
     {
         if (collision.tag == "Player")
         {
+            isAllowDamage = false;
             collision.GetComponent<Health>().TakeDamage(damage);
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (collision.tag == "Player")
+        {
+            isAllowDamage = true;
         }
     }
 }

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Properties;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
@@ -11,7 +12,7 @@ public class Player_Controller : MonoBehaviour
     GameController _gameController;
     public AudioSource _myAudio;
     Rigidbody2D _myBody;
-    bool _stop;
+    bool isPlayerDead = false;
     public Transform _feet;
     Player_Animation _playerAnimScript;
     public bool _grounded, _canJump, _hitGround;
@@ -47,28 +48,32 @@ public class Player_Controller : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (!_stop)
-        {
-            float _moveSpeed = 0;
+        if (!isPlayerDead)
+            return;
 
-            //Change horizontal speed when in the air.
-            if (_grounded)
-            {
-                _moveSpeed = _groundMoveSpeed * Input.GetAxisRaw("Horizontal");
-            }
-            else
-            {
-                _moveSpeed = _airMoveSpeed * Input.GetAxisRaw("Horizontal");
-            }
-            
-            Vector2 _moveVector = new Vector2(_moveSpeed, 0);
-            _myBody.AddForce(_moveVector);
+        float _moveSpeed = 0;
+
+        //Change horizontal speed when in the air.
+        if (_grounded)
+        {
+            _moveSpeed = _groundMoveSpeed * Input.GetAxisRaw("Horizontal");
         }
+        else
+        {
+            _moveSpeed = _airMoveSpeed * Input.GetAxisRaw("Horizontal");
+        }
+
+        Vector2 _moveVector = new Vector2(_moveSpeed, 0);
+        _myBody.AddForce(_moveVector);
+
     }
 
     // Update is called once per frame
     private void Update()
     {
+        if (isPlayerDead)
+            return;
+
         horizontalInput = Input.GetAxis("Horizontal");
 
         //flip player left and right
@@ -77,11 +82,10 @@ public class Player_Controller : MonoBehaviour
         else if (horizontalInput < -0.01f)
             transform.localScale = new Vector3(-1, 1, 1);
         //JUMP.
-        if (Input.GetKeyDown(KeyCode.Space) && _canJump && !_stop && isGrounded())
+        if (Input.GetKeyDown(KeyCode.Space) && _canJump && !isPlayerDead && isGrounded())
         {
             PerformJump(_jumpForce, 1);
             _myAudio.PlayOneShot(_audioJump);
-
         }
 
         if (Input.GetKeyUp(KeyCode.Space))
@@ -112,8 +116,6 @@ public class Player_Controller : MonoBehaviour
         //Wall Jump Logic
         if (wallJumpCooldown < 0.2f)
         {
-
-
             _myBody.velocity = new Vector2(horizontalInput * _groundMoveSpeed, _myBody.velocity.y);
 
             if (onWall() && !isGrounded())
@@ -140,7 +142,7 @@ public class Player_Controller : MonoBehaviour
         CheckGround();
         UpdateCoyoteTime();
         EnemyCheck();
-        print(onWall());
+        //print(onWall());
     }
 
     void PerformJump(float _jumpStrength, float _hangMultiplier)
@@ -150,7 +152,7 @@ public class Player_Controller : MonoBehaviour
         _currentJumpTimer = _jumpTimer * _hangMultiplier;
         _myBody.gravityScale = 0f;
         Vector2 _jumpVector = new Vector2(0, _jumpStrength);
-        _myBody.AddForce(_jumpVector, ForceMode2D.Impulse);    
+        _myBody.AddForce(_jumpVector, ForceMode2D.Impulse);
         _playerAnimScript.JumpStart();
     }
 
@@ -202,7 +204,7 @@ public class Player_Controller : MonoBehaviour
         for (int i = 0; i < _colliders.Length; i++)
         {
             if (_colliders[i].gameObject.CompareTag("Enemy") && !_invulnerable)
-            {     
+            {
                 _invulnerable = true;
                 PerformJump(_jumpForce * 0.8f, 0.5f);
                 StartCoroutine(InvulnerableReset());
@@ -216,7 +218,7 @@ public class Player_Controller : MonoBehaviour
 
     public void HitGround()
     {
-        
+
         _trackCoyoteTime = _coyoteTime;
         _jumpInputTime = _analogueJumpTime;
         _playerAnimScript.JumpLand();
@@ -251,7 +253,7 @@ public class Player_Controller : MonoBehaviour
 
     public void WinState()
     {
-        _stop = true;
+        isPlayerDead = true;
         _playerAnimScript.WinAnim();
         _gameController.WinScreen();
         _myAudio.PlayOneShot(_audioWin);
@@ -276,14 +278,10 @@ public class Player_Controller : MonoBehaviour
         //Check for enemy collision.
         if (collision.gameObject.CompareTag("Enemy") && !_invulnerable)
         {
-            _gameController.GameOver();
-            _stop = true;
-            _invulnerable = true;
-            _playerAnimScript.DeathAnim();
-            _myAudio.PlayOneShot(_audioDie);
+            KillPlayer();
         }
 
-       
+
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -304,11 +302,24 @@ public class Player_Controller : MonoBehaviour
 
         //Check for goal.
         if (collision.gameObject.CompareTag("Goal"))
-         {
+        {
 
             WinState();
         }
 
+    }
+
+    public void KillPlayer()
+    {
+
+        if (isPlayerDead)
+            return;
+
+        //_gameController.GameOver();
+        isPlayerDead = true;
+        _invulnerable = true;
+        _playerAnimScript.DeathAnim();
+        _myAudio.PlayOneShot(_audioDie);
     }
 
     private bool isGrounded()
@@ -319,10 +330,10 @@ public class Player_Controller : MonoBehaviour
 
     private bool onWall()
     {
-        RaycastHit2D raycastHit = Physics2D.BoxCast(BoxCollider.bounds.center, BoxCollider.bounds.size, 0, new Vector2(transform.localScale.x, 0), 0.1f, wallLayer);
+        RaycastHit2D raycastHit = Physics2D.BoxCast(BoxCollider.bounds.center, BoxCollider.bounds.size, 0, transform.right, 0.1f, wallLayer);
         return raycastHit.collider != null;
     }
 
-    
+
 }
 
