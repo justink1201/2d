@@ -90,20 +90,15 @@ public class Player_Controller : MonoBehaviour
             PerformJump(_jumpForce, 2);
             _myAudio.PlayOneShot(_audioJump);
         }
+
         //Adjustable jump height
         if(Input.GetKeyUp(KeyCode.Space) && _myBody.velocity.y > 0)
             _myBody.velocity = new Vector2(_myBody.velocity.x, _myBody.velocity.y / 2);
-        
-        if (onWall())
-        {
-            _myBody.gravityScale = 0;
-            _myBody.velocity = Vector2.zero;
-        }
-        else
-        {
-            _myBody.gravityScale = 2;
-            _myBody.velocity = new Vector2(horizontalInput * _groundMoveSpeed, _myBody.velocity.y);
-        }
+
+
+        _myBody.gravityScale = 2;
+        _myBody.velocity = new Vector2(horizontalInput * _groundMoveSpeed, _myBody.velocity.y);
+
         TimeVariableJump();
         CheckGround();
         UpdateCoyoteTime();
@@ -287,8 +282,8 @@ public class Player_Controller : MonoBehaviour
         if (isPlayerDead)
             return;
 
-        //_gameController.GameOver();
-        if (isPlayerDead = true);
+        _gameController.GameOver();
+        isPlayerDead = true;
         _invulnerable = true;
         _playerAnimScript.DeathAnim();
         _myAudio.PlayOneShot(_audioDie);
