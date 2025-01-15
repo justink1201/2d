@@ -11,7 +11,9 @@ public class Enemy_Movement : MonoBehaviour
     Animator _myAnim;
     AudioSource _myAudio;
     bool _stop;
-
+    private bool movingLeft;
+    private float leftEdge;
+    private float rightEdge;
     public LayerMask _groundLayer;
     public Transform _leftWallCheck, _rightWallCheck;
     public Transform _leftFloorCheck, _rightFloorCheck;
@@ -25,7 +27,6 @@ public class Enemy_Movement : MonoBehaviour
     }
 
 
-    
     // Update is called once per frame
     void Update()
     {

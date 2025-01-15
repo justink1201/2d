@@ -288,10 +288,11 @@ public class Player_Controller : MonoBehaviour
             return;
 
         //_gameController.GameOver();
-        isPlayerDead = true;
+        if (isPlayerDead = true);
         _invulnerable = true;
         _playerAnimScript.DeathAnim();
         _myAudio.PlayOneShot(_audioDie);
+
     }
 
     private bool isGrounded()

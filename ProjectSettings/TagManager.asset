@@ -18,7 +18,7 @@ TagManager:
   - 
   - 
   - Wall
-  - 
+  - enemy
   - 
   - 
   - 
@@ -43,4 +43,34 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Ground
+    uniqueID: 2782190055
+    locked: 0
+  - name: Enemy
+    uniqueID: 2578269431
+    locked: 0
+  - name: New Layer 3
+    uniqueID: 1530150111
+    locked: 0
+  - name: New Layer 4
+    uniqueID: 1674432227
+    locked: 0
+  - name: New Layer 5
+    uniqueID: 1000116785
+    locked: 0
+  - name: New Layer 6
+    uniqueID: 460332693
+    locked: 0
+  - name: New Layer 7
+    uniqueID: 2807654895
+    locked: 0
+  - name: New Layer 8
+    uniqueID: 1950059441
+    locked: 0
+  - name: New Layer 9
+    uniqueID: 359499463
+    locked: 0
+  - name: New Layer 10
+    uniqueID: 951727975
     locked: 0
